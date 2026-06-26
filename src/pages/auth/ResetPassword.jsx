@@ -1,6 +1,7 @@
-// src/pages/ResetPassword.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+
+const API_BASE = 'http://localhost:8080';
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -11,16 +12,12 @@ export default function ResetPassword() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [tokenValid, setTokenValid] = useState(true);
-  const API_BASE = 'http://localhost:8080';
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const t = urlParams.get('token');
-    if (!t) {
-      setTokenValid(false);
-    } else {
-      setToken(t);
-    }
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get('token');
+    if (!t) setTokenValid(false);
+    else setToken(t);
   }, []);
 
   const handleSubmit = async (e) => {
@@ -40,21 +37,29 @@ export default function ResetPassword() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_BASE}/api/users/reset-password`, {
+      const response = await fetch(`${API_BASE}/api/users/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, newPassword })
       });
-      const text = await res.text();
 
-      if (res.ok) {
-        setMessage('✅ ' + text);
+      // ✅ Safe parsing – JSON or plain text
+      let data;
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      } else {
+        data = { message: await response.text() };
+      }
+
+      if (response.ok) {
+        setMessage('✅ ' + (data.message || 'Password reset successfully!'));
         setTimeout(() => navigate('/'), 2000);
       } else {
-        if (res.status === 400) {
+        const errorMsg = data.message || data.error || data || 'Something went wrong.';
+        setError('❌ ' + errorMsg);
+        if (response.status === 400 && errorMsg.toLowerCase().includes('expired')) {
           setTokenValid(false);
-        } else {
-          setError('❌ ' + (text || 'Something went wrong.'));
         }
       }
     } catch (err) {

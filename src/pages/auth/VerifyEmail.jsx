@@ -1,5 +1,8 @@
+// src/pages/auth/VerifyEmail.jsx
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
+
+const API_BASE = 'http://localhost:8080';
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
@@ -11,10 +14,11 @@ export default function VerifyEmail() {
       setStatus({ type: 'error', msg: '❌ Invalid verification link. No token found.' });
       return;
     }
+
     const doVerification = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/api/auth/verify-email?token=${token}`);
-        const data = await res.json();
+        const res = await fetch(`${API_BASE}/api/auth/verify-email?token=${token}`);
+        const data = await res.json().catch(() => ({}));
         if (res.ok) {
           setStatus({ type: 'success', msg: data.message || '✅ Email verified successfully!' });
         } else {

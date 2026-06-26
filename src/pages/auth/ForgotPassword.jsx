@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+const API_BASE = 'http://localhost:8080';
+
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -14,16 +16,20 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      const res = await fetch(`http://localhost:8080/api/users/forgot-password?email=${email}`, {
+      // ✅ Body mein email bhejo, query param mein nahi
+      const res = await fetch(`${API_BASE}/api/users/forgot-password`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
       });
+
+      const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
         setMessage('✅ If an account exists, a password reset link has been dispatched.');
+        setEmail('');
       } else {
-        const data = await res.json().catch(() => ({}));
-        setError(data.error || 'Failed to request password reset link.');
+        setError(data.message || data.error || 'Failed to request password reset link.');
       }
     } catch (err) {
       setError('Connection to server failed.');
