@@ -1,6 +1,7 @@
 // src/pages/teacher/ViewModule.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import config from '../../config/config';
 
 export default function ViewModule() {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ export default function ViewModule() {
   const [moduleData, setModuleData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = config.API_BASE;
 
   useEffect(() => {
     const token = localStorage.getItem('token');

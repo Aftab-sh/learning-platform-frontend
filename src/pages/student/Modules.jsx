@@ -1,6 +1,8 @@
 // src/pages/Modules.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import config from '../../config/config';
+
 
 export default function Modules() {
   const { courseId } = useParams();
@@ -8,7 +10,7 @@ export default function Modules() {
   const [modules, setModules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [courseTitle, setCourseTitle] = useState('Course');
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = config.API_BASE;
 
   useEffect(() => {
     const token = localStorage.getItem('token');

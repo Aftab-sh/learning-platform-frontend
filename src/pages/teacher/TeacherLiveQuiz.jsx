@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
+import config from '../../config/config';
 
 export default function TeacherLiveQuiz() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function TeacherLiveQuiz() {
   const [nextDisabled, setNextDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
   const stompClientRef = useRef(null);
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE =config.API_BASE;
 
   useEffect(() => {
     const token = localStorage.getItem('token');

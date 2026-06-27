@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import ModuleContentEditor from './ModuleContentEditor';
+import config from '../../config/config';
 export default function CreateModule() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -15,7 +16,7 @@ export default function CreateModule() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = config.API_BASE;
 
   useEffect(() => {
     const token = localStorage.getItem('token');

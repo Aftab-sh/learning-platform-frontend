@@ -3,6 +3,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
+import config from '../../config/config';
+
+
 
 export default function LiveQuiz() {
   const navigate = useNavigate();
@@ -29,7 +32,8 @@ export default function LiveQuiz() {
   const roomCodeRef = useRef('');        // latest roomCode
   const studentNameRef = useRef('');     // latest studentName
 
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = config.API_BASE;
+
   const TOTAL_TIME = 20000;
   const MAX_POINTS = 1000;
 

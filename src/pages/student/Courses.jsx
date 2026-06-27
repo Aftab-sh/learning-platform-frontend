@@ -1,6 +1,8 @@
 // src/pages/Courses.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import config from '../../config/config';
+
 
 export default function Courses() {
   const navigate = useNavigate();
@@ -13,8 +15,7 @@ export default function Courses() {
   const queryParams = new URLSearchParams(location.search);
   const mode = queryParams.get('mode') || 'explore';
 
-  const API_BASE = 'http://localhost:8080';
-
+const API_BASE = config.API_BASE;
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {

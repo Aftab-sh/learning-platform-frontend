@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import config from '../../config/config';
 
-const API_BASE = 'http://localhost:8080';
+
+
+const API_BASE = config.API_BASE;
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');

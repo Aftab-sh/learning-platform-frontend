@@ -1,13 +1,15 @@
 // src/pages/ForgotPassword.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import config from '../../config/config';
+
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const API_BASE = 'http://localhost:8080';
+const API_BASE = config.API_BASE;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

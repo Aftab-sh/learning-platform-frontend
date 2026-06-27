@@ -1,6 +1,8 @@
 // src/pages/auth/Register.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import config from '../../config/config';
+
 
 export default function Register() {
   const navigate = useNavigate();
@@ -11,7 +13,8 @@ export default function Register() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_BASE = config.API_BASE;
+
 
   const handleRegister = async (e) => {
     e.preventDefault();

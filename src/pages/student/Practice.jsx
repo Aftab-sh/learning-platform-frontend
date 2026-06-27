@@ -1,6 +1,7 @@
 // src/pages/student/Practice.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import config from '../../config/config';
 
 export default function Practice() {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ export default function Practice() {
   const [currentDifficulty, setCurrentDifficulty] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = config.API_BASE;
 
   useEffect(() => {
     const token = localStorage.getItem('token');

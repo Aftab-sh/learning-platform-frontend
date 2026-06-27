@@ -1,6 +1,7 @@
 // src/pages/teacher/TeacherStudents.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import config from '../../config/config';
 
 export default function TeacherStudents() {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ export default function TeacherStudents() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [studentProgress, setStudentProgress] = useState(null);
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = config.API_BASE;
 
   useEffect(() => {
     const token = localStorage.getItem('token');

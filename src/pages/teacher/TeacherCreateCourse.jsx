@@ -1,6 +1,7 @@
 // src/pages/teacher/TeacherCreateCourse.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import config from '../../config/config';
 
 export default function TeacherCreateCourse() {
   const navigate = useNavigate();
@@ -8,7 +9,7 @@ export default function TeacherCreateCourse() {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = config.API_BASE;
 
   useEffect(() => {
     const token = localStorage.getItem('token');

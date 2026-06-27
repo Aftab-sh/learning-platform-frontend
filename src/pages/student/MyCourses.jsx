@@ -1,13 +1,15 @@
 // src/pages/MyCourses.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import config from '../../config/config';
+
 
 export default function MyCourses() {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [progress, setProgress] = useState({});
   const [loading, setLoading] = useState(true);
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = config.API_BASE;
 
   useEffect(() => {
     const token = localStorage.getItem('token');

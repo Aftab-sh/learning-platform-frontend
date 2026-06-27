@@ -1,6 +1,7 @@
 // src/pages/student/PracticeSolve.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import config from '../../config/config';
 
 export default function PracticeSolve() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ export default function PracticeSolve() {
   const codeEditorRef = useRef(null);
   const lineNumbersRef = useRef(null);
   const saveTimeoutRef = useRef(null);
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = config.API_BASE;
 
   const templates = {
     71: '# Python\nimport sys\n\ndef solve():\n    data = sys.stdin.read().strip().split()\n    # your code here\n    pass\n\nif __name__ == "__main__":\n    solve()',

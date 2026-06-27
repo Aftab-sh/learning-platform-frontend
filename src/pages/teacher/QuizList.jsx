@@ -1,6 +1,7 @@
 // src/pages/teacher/QuizList.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import config from '../../config/config';
 
 export default function QuizList() {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ export default function QuizList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = config.API_BASE;
 
   useEffect(() => {
     const token = localStorage.getItem('token');

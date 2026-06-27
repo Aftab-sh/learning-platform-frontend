@@ -1,8 +1,12 @@
 // src/pages/student/CodingPractice.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+  import config from '../../config/config';
 
-export default function CodingPractice() {
+
+
+export default function CodingPractice()
+ {
   const navigate = useNavigate();
   const { courseId, moduleId } = useParams(); 
   
@@ -20,7 +24,9 @@ export default function CodingPractice() {
   const codeEditorRef = useRef(null);
   const lineNumbersRef = useRef(null);
   const saveTimeoutRef = useRef(null);
-  const API_BASE = 'http://localhost:8080';
+
+
+const API_BASE = config.API_BASE;
 
   const templates = {
     71: '# Python\na, b = map(int, input().split())\nprint(a + b)',

@@ -1,13 +1,14 @@
 // src/pages/teacher/TeacherCodingModules.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import config from '../../config/config';
 
 export default function TeacherCodingModules() {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = config.API_BASE;
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -107,7 +108,9 @@ function ModuleList({ courseId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const API_BASE = 'http://localhost:8080';
+  
+  const API_BASE = config.API_BASE;
+
 
   useEffect(() => {
     const loadModules = async () => {

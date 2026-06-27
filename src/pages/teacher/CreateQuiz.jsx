@@ -1,6 +1,7 @@
 // src/pages/teacher/CreateQuiz.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import config from '../../config/config';
 
 export default function CreateQuiz() {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ export default function CreateQuiz() {
   const [quizTitle, setQuizTitle] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = config.API_BASE;
 
   useEffect(() => {
     const token = localStorage.getItem('token');

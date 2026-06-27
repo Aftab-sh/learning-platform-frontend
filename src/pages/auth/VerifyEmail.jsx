@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 
-const API_BASE = 'http://localhost:8080';
+import config from '../../config/config';
+const API_BASE = config.API_BASE;
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();

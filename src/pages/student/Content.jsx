@@ -1,6 +1,8 @@
 // src/pages/student/Content.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import config from '../../config/config';
+
 
 export default function Content() {
   const { courseId, moduleId } = useParams();
@@ -14,7 +16,9 @@ export default function Content() {
   const [answers, setAnswers] = useState({});
   const [quizResult, setQuizResult] = useState(null);
   const [passingPct, setPassingPct] = useState(50);
-  const API_BASE = 'http://localhost:8080';
+
+  const API_BASE = config.API_BASE;
+
 
   // ─── FETCH MODULE & QUIZ DATA ───
   useEffect(() => {

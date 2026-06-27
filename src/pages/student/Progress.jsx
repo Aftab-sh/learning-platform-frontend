@@ -1,6 +1,7 @@
 // src/pages/student/Progress.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import config from '../../config/config';
 
 export default function Progress() {
   const navigate = useNavigate();
@@ -8,7 +9,7 @@ export default function Progress() {
   const [level, setLevel] = useState({ level: 1, title: 'Beginner', next: 100 });
   const [analytics, setAnalytics] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = config.API_BASE;
 
   const ALL_BADGES = [
     { id: 'first_login', label: '🌟 First Login', desc: 'Login for the first time' },

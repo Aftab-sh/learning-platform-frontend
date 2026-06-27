@@ -1,6 +1,7 @@
 // src/pages/teacher/TeacherCoding.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import config from '../../config/config';
 
 export default function TeacherCoding() {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ export default function TeacherCoding() {
     marks: 10,
     orderIndex: 1
   });
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE =config.API_BASE;
 
   useEffect(() => {
     const token = localStorage.getItem('token');

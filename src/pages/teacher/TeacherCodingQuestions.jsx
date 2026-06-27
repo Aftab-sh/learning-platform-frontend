@@ -1,6 +1,7 @@
 // src/pages/teacher/TeacherCodingQuestions.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import config from '../../config/config';
 
 export default function TeacherCodingQuestions() {
   const navigate = useNavigate();
@@ -10,7 +11,8 @@ export default function TeacherCodingQuestions() {
   const [editingId, setEditingId] = useState(null);
   const [topicName, setTopicName] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE = config.API_BASE;
+  
 
   useEffect(() => {
     const token = localStorage.getItem('token');

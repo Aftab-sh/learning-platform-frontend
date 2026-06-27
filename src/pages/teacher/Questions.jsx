@@ -1,6 +1,7 @@
 // src/pages/teacher/Questions.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import config from '../../config/config';
 
 export default function Questions() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export default function Questions() {
     correctOption: 0,
     marks: 1
   });
-  const API_BASE = 'http://localhost:8080';
+  const API_BASE =config.API_BASE;
 
   useEffect(() => {
     const token = localStorage.getItem('token');
