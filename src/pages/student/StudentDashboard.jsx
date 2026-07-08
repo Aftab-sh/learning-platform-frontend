@@ -77,9 +77,9 @@ export default function StudentDashboard() {
             </button>
           </div>
 
-          {/* ✅ Card 3: Coding Practice – Navigate to /coding-practice */}
+          {/* ✅ Card 3: Coding Practice – Navigate to practice */}
           <div
-            onClick={() => navigate('/coding-practice')}
+            onClick={() => navigate('/practice')}
             className="bg-[#11161f] border border-[#1e2330] p-6 rounded-xl hover:border-emerald-500/50 cursor-pointer transition shadow-md flex flex-col justify-between group"
           >
             <div>

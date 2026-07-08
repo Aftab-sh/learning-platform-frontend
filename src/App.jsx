@@ -15,7 +15,6 @@ import Courses from './pages/student/Courses';
 import MyCourses from './pages/student/MyCourses';
 import Modules from './pages/student/Modules';
 import Content from './pages/student/Content';
-import CodingTest from './pages/student/CodingTest';
 import Practice from './pages/student/Practice';
 import PracticeSolve from './pages/student/PracticeSolve';
 import Progress from './pages/student/Progress';
@@ -73,7 +72,6 @@ function App() {
 <Route path="/mycourses" element={<MyCourses />} />           {/* ✅ My Courses */}
 <Route path="/course/:courseId/modules" element={<Modules />} />
 <Route path="/course/:courseId/module/:moduleId/content" element={<Content />} />
-<Route path="/course/:moduleId/coding" element={<CodingTest />} />
 
 <Route path="/course/:courseId/module/:moduleId/coding-practice" element={<CodingPractice />} /> {/* ✅ Coding Practice */}
 <Route path="/practice" element={<Practice />} />              {/* ✅ Practice (topics) */}
