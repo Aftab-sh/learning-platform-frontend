@@ -97,3 +97,10 @@ VITE_API_BASE_URL=https://your-backend-url.com
 
 # 4. Start the development server
 npm run dev
+
+
+
+Author
+
+Shaikh Aftab
+
