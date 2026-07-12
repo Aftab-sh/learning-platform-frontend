@@ -67,7 +67,7 @@ export default function Login() {
     setResendStatus('Sending...');
     try {
       const res = await fetch(
-        `${API_BASE}/api/users/resend-verification?email=${encodeURIComponent(email)}`,
+        `${API_BASE}/api/auth/resend-verification?email=${encodeURIComponent(email)}`,
         { method: 'POST' }
       );
       const data = await res.json().catch(() => ({}));
