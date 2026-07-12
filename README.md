@@ -1,16 +1,106 @@
-# React + Vite
+LearnBridge – Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React-based frontend for LearnBridge, a role-based Learning Management System that provides an interactive learning experience for students and teachers.
 
-Currently, two official plugins are available:
+🔗 Live Demo: learning-platform-frontend-delta.vercel.app
+🔗 Backend Repo: learning-platform-backend
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## React Compiler
+Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Student
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Registration & login
+Course enrollment
+Module-based, step-by-step learning
+Quiz attempt system
+Coding practice with instant evaluation
+Live quiz participation
+Progress tracking dashboard
+
+
+Teacher
+
+
+Course creation
+Module management
+Quiz management
+Coding problem management
+Live quiz creation
+Student analytics
+
+
+
+Tech Stack
+
+CategoryTechnologyLibraryReact.jsRoutingReact Router DOMHTTP ClientAxiosStylingTailwind CSSReal-timeWebSocket ClientAuthJWT
+
+
+Folder Structure
+
+src/
+├── components/    # Reusable UI components
+├── pages/
+│   ├── auth/      # Login, Register, Password reset
+│   ├── student/   # Student-facing pages
+│   └── teacher/   # Teacher-facing pages
+├── services/      # API service functions
+├── hooks/         # Custom React hooks
+├── utils/         # Helper utilities
+└── assets/        # Images, icons, static files
+
+
+Modules
+
+Student
+
+
+Dashboard
+Courses
+My Courses
+Learning Content
+Coding Practice
+Progress Tracking
+Live Quiz
+
+
+Teacher
+
+
+Dashboard
+Course Management
+Module Management
+Quiz Management
+Coding Questions
+Student Tracking
+Live Quiz Management
+
+
+
+Getting Started
+
+bash# 1. Clone the repository
+git clone https://github.com/Aftab-sh/learning-platform-frontend.git
+cd learning-platform-frontend
+
+# 2. Install dependencies
+npm install
+
+# 3. Configure environment variables
+
+# .env.development
+VITE_API_BASE_URL=http://localhost:8080
+
+# .env.production
+VITE_API_BASE_URL=https://your-backend-url.com
+
+# 4. Start the development server
+npm run dev
+
+
+
+Author
+
+Shaikh Aftab
+
