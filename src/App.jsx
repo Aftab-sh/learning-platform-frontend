@@ -20,6 +20,9 @@ import PracticeSolve from './pages/student/PracticeSolve';
 import Progress from './pages/student/Progress';
 import CodingPractice from './pages/student/CodingPractice';
 
+//AI
+import LearningPlan from './pages/student/LearningPlan';
+
 // ─── TEACHER PAGES ───
 import TeacherDashboard from './pages/teacher/TeacherDashboard';
 import TeacherCourses from './pages/teacher/TeacherCourses';
@@ -78,6 +81,11 @@ function App() {
 <Route path="/practice-solve" element={<PracticeSolve />} />
 <Route path="/progress" element={<Progress />} />
 <Route path="/student-live-quiz" element={<LiveQuiz />} />
+
+<Route
+  path="/ai-learning-plan/:courseId"
+  element={<LearningPlan />}
+/>
 
         
 

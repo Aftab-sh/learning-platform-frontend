@@ -1,185 +1,426 @@
 // src/pages/student/Progress.jsx
-import React, { useState, useEffect } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import config from '../../config/config';
 
 export default function Progress() {
   const navigate = useNavigate();
-  const [xpData, setXpData] = useState({ xp: 0, streak: 0, badges: [] });
-  const [level, setLevel] = useState({ level: 1, title: 'Beginner', next: 100 });
-  const [analytics, setAnalytics] = useState([]);
-  const [loading, setLoading] = useState(true);
   const API_BASE = config.API_BASE;
 
-  const ALL_BADGES = [
-    { id: 'first_login', label: '🌟 First Login', desc: 'Login for the first time' },
-    { id: 'streak_3', label: '🔥 3 Day Streak', desc: 'Login 3 days in a row' },
-    { id: 'streak_7', label: '⚡ 7 Day Streak', desc: 'Login 7 days in a row' },
-    { id: 'streak_30', label: '👑 30 Day Streak', desc: 'Login 30 days in a row' },
-    { id: 'xp_100', label: '⭐ 100 XP', desc: 'Earn 100 XP' },
-    { id: 'xp_500', label: '💎 500 XP', desc: 'Earn 500 XP' },
-    { id: 'xp_1000', label: '🏆 1000 XP', desc: 'Earn 1000 XP' },
-  ];
+  const [courses, setCourses] = useState([]);
+  const [courseProgress, setCourseProgress] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+
     if (!token) {
       navigate('/');
       return;
     }
-    loadProgressData();
-  }, []);
 
-  const getLevel = (xp) => {
-    if (xp >= 1000) return { level: 5, title: 'Master', next: 1500 };
-    if (xp >= 500) return { level: 4, title: 'Expert', next: 1000 };
-    if (xp >= 250) return { level: 3, title: 'Advanced', next: 500 };
-    if (xp >= 100) return { level: 2, title: 'Intermediate', next: 250 };
-    return { level: 1, title: 'Beginner', next: 100 };
-  };
+    const authHeaders = { Authorization: 'Bearer ' + token };
 
-  const loadProgressData = async () => {
-    setLoading(true);
-    try {
-      // Fetch progress from backend
-      const res = await fetch(`${API_BASE}/api/student/progress/analytics`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setXpData(data.xpData || { xp: 0, streak: 0, badges: [] });
-        setAnalytics(data.analytics || []);
-      } else {
-        // Fallback to localStorage
-        const savedXp = localStorage.getItem('cl_xp');
-        const savedStreak = localStorage.getItem('cl_streak');
-        const savedBadges = localStorage.getItem('cl_badges');
-        setXpData({
-          xp: parseInt(savedXp) || 0,
-          streak: parseInt(savedStreak) || 0,
-          badges: savedBadges ? JSON.parse(savedBadges) : []
-        });
+    const loadProgress = async () => {
+      setLoading(true);
+      setError('');
+
+      try {
+        // 1. Logged-in student ke enrolled courses
+        const coursesResponse = await fetch(
+          API_BASE + '/api/student/courses',
+          { headers: authHeaders }
+        );
+
+        if (coursesResponse.status === 401 || coursesResponse.status === 403) {
+          throw new Error(
+            'You are not authorized to view your progress. Please log in again.'
+          );
+        }
+
+        if (!coursesResponse.ok) {
+          throw new Error('Unable to load your enrolled courses.');
+        }
+
+        const coursesData = await coursesResponse.json();
+        const enrolledCourses = Array.isArray(coursesData) ? coursesData : [];
+
+        setCourses(enrolledCourses);
+
+        if (enrolledCourses.length === 0) {
+          setCourseProgress([]);
+          return;
+        }
+
+        // 2. Har course ka module progress
+        const progressResults = await Promise.all(
+          enrolledCourses.map(async (course) => {
+            const courseId = course.id ?? course.courseId;
+
+            if (courseId == null) {
+              return { course, modules: [], error: 'Course ID is missing.' };
+            }
+
+            try {
+              const response = await fetch(
+                API_BASE + '/api/student/progress/course/' + courseId,
+                { headers: authHeaders }
+              );
+
+              if (!response.ok) {
+                return {
+                  course,
+                  modules: [],
+                  error: 'Unable to load progress for this course.',
+                };
+              }
+
+              const modules = await response.json();
+
+              return {
+                course,
+                modules: Array.isArray(modules) ? modules : [],
+                error: '',
+              };
+            } catch (e) {
+              return {
+                course,
+                modules: [],
+                error: 'Unable to connect to load this course progress.',
+              };
+            }
+          })
+        );
+
+        setCourseProgress(progressResults);
+      } catch (err) {
+        console.error('Error loading student progress:', err);
+        setError(err.message || 'Something went wrong while loading progress.');
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error('Error loading progress:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  const xp = xpData.xp || 0;
-  const streak = xpData.streak || 0;
-  const badges = xpData.badges || [];
-  const lvl = getLevel(xp);
-  const pct = Math.min(100, Math.round((xp / lvl.next) * 100));
+    loadProgress();
+  }, [API_BASE, navigate]);
 
   const handleLogout = () => {
     localStorage.clear();
     navigate('/');
   };
 
+  const getCourseTitle = (course) =>
+    course.title ||
+    course.courseName ||
+    course.name ||
+    'Course ' + (course.id ?? course.courseId ?? '');
+
+  const isCompleted = (module) => module.completed === true;
+
+  const totalModules = courseProgress.reduce(
+    (total, item) => total + item.modules.length,
+    0
+  );
+
+  const completedModules = courseProgress.reduce(
+    (total, item) => total + item.modules.filter(isCompleted).length,
+    0
+  );
+
+  const overallPercentage =
+    totalModules > 0 ? Math.round((completedModules / totalModules) * 100) : 0;
+
+  const totalCourses = courses.length;
+
+  const getCoursePercentage = (modules) => {
+    if (!modules.length) return 0;
+    const completed = modules.filter(isCompleted).length;
+    return Math.round((completed / modules.length) * 100);
+  };
+
+  const formatDate = (dateValue) => {
+    if (!dateValue) return '—';
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) return '—';
+    return date.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
   if (loading) {
-    return <div className="min-h-screen bg-[#0a0f1a] text-gray-200 flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-[#0a0f1a] text-gray-200 flex items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto mb-3 h-10 w-10 animate-spin rounded-full border-4 border-[#1e2330] border-t-cyan-400" />
+          <p className="text-gray-400">Loading your learning progress...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-[#0a0f1a] text-gray-200 font-sans">
-      <nav className="flex justify-between items-center bg-[#11161f] px-6 py-4 border-b border-[#1e2330]">
+      {/* Navigation */}
+      <nav className="flex flex-wrap justify-between items-center gap-4 bg-[#11161f] px-6 py-4 border-b border-[#1e2330]">
         <div className="text-xl font-bold text-[#00e0ff]">&lt;CodeLearn/&gt;</div>
-        <div className="flex items-center gap-4">
+
+        <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/student-dashboard')}
-            className="border border-gray-600 text-gray-300 hover:border-blue-500 hover:text-blue-400 px-4 py-1.5 rounded-lg text-sm font-medium transition"
+            className="border border-gray-600 text-gray-300 hover:border-blue-500 hover:text-blue-400 px-4 py-2 rounded-lg text-sm font-medium transition"
           >
             ← Dashboard
           </button>
+
           <button
             onClick={handleLogout}
-            className="border border-red-500 text-red-500 hover:bg-red-500/10 px-4 py-1.5 rounded-lg text-sm font-medium transition"
+            className="border border-red-500 text-red-500 hover:bg-red-500/10 px-4 py-2 rounded-lg text-sm font-medium transition"
           >
             Logout
           </button>
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        {/* XP Card */}
-        <div className="bg-gradient-to-r from-purple-900/40 to-blue-900/30 border border-purple-800/30 rounded-xl p-6">
-          <div className="flex justify-between items-start mb-4">
-            <div>
-              <div className="text-lg font-bold text-white">Level {lvl.level} — {lvl.title}</div>
-              <div className="text-sm text-gray-400">{xp} XP total</div>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-yellow-400">🔥 {streak}</div>
-              <div className="text-sm text-gray-400">Day Streak</div>
-            </div>
-          </div>
-          <div className="w-full h-2 bg-[#1e2330] rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-cyan-400 to-purple-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
-          </div>
-          <div className="flex justify-between text-xs text-gray-400 mt-1">
-            <span>{xp} XP</span>
-            <span>{lvl.next} XP for Level {lvl.level + 1}</span>
-          </div>
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        {/* Page heading */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white">My Learning Progress</h1>
+          <p className="text-gray-400 mt-2">
+            Track your course completion, module progress and quiz scores.
+          </p>
         </div>
 
-        {/* Analytics */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-bold text-white mb-4">📊 Quiz Analytics</h2>
-          <p className="text-gray-400 text-sm mb-6">Track your performance across all modules.</p>
-          {analytics.length === 0 ? (
-            <div className="bg-[#11161f] border border-[#1e2330] rounded-xl p-6 text-center text-gray-400">
-              No quiz data available yet. Start taking quizzes!
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {analytics.map((item, idx) => (
-                <div key={idx} className="bg-[#11161f] border border-[#1e2330] rounded-xl p-4">
-                  <div className="flex justify-between items-center">
-                    <span className="font-bold text-white">{item.moduleTitle}</span>
-                    <span className={`font-bold ${item.score >= 60 ? 'text-green-400' : 'text-yellow-400'}`}>
-                      {item.score}%
-                    </span>
-                  </div>
-                  <div className="w-full h-1.5 bg-[#1e2330] rounded-full mt-2 overflow-hidden">
-                    <div className={`h-full rounded-full ${item.score >= 60 ? 'bg-green-500' : 'bg-yellow-500'}`} style={{ width: `${item.score}%` }} />
-                  </div>
-                  <div className="flex justify-between text-xs text-gray-400 mt-1">
-                    <span>{item.attempts || 1} attempt(s)</span>
-                    <span>{item.completed ? '✅ Completed' : '📖 In Progress'}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Error message */}
+        {error && (
+          <div
+            role="alert"
+            className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-300"
+          >
+            <p>{error}</p>
 
-        {/* Badges */}
-        <div className="mt-10">
-          <h2 className="text-2xl font-bold text-white mb-4">🏅 My Badges</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {ALL_BADGES.map((b) => {
-              const earned = badges.includes(b.id);
-              return (
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-3 text-sm font-semibold underline underline-offset-4"
+            >
+              Try again
+            </button>
+          </div>
+        )}
+
+        {!error && (
+          <>
+            {/* Overall summary */}
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="bg-[#11161f] border border-[#1e2330] rounded-xl p-5">
+                <p className="text-sm text-gray-400">Enrolled Courses</p>
+                <p className="text-3xl font-bold text-cyan-400 mt-2">{totalCourses}</p>
+              </div>
+
+              <div className="bg-[#11161f] border border-[#1e2330] rounded-xl p-5">
+                <p className="text-sm text-gray-400">Total Modules</p>
+                <p className="text-3xl font-bold text-white mt-2">{totalModules}</p>
+              </div>
+
+              <div className="bg-[#11161f] border border-[#1e2330] rounded-xl p-5">
+                <p className="text-sm text-gray-400">Completed Modules</p>
+                <p className="text-3xl font-bold text-green-400 mt-2">{completedModules}</p>
+              </div>
+
+              <div className="bg-[#11161f] border border-[#1e2330] rounded-xl p-5">
+                <p className="text-sm text-gray-400">Overall Completion</p>
+                <p className="text-3xl font-bold text-purple-400 mt-2">{overallPercentage}%</p>
+              </div>
+            </section>
+
+            {/* Overall progress bar */}
+            <section className="bg-[#11161f] border border-[#1e2330] rounded-xl p-5 sm:p-6 mb-8">
+              <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
+                <h2 className="text-lg font-bold text-white">Overall Course Progress</h2>
+
+                <span className="text-sm text-cyan-400 font-semibold">
+                  {completedModules} of {totalModules} modules completed
+                </span>
+              </div>
+
+              <div
+                className="w-full h-3 bg-[#1e2330] rounded-full overflow-hidden"
+                role="progressbar"
+                aria-label="Overall course completion"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={overallPercentage}
+              >
                 <div
-                  key={b.id}
-                  className={`bg-[#11161f] border rounded-xl p-4 text-center transition ${
-                    earned ? 'border-green-500/50 hover:border-green-400' : 'border-[#1e2330] opacity-60'
-                  }`}
-                >
-                  <div className="text-3xl mb-2">{b.label.split(' ')[0]}</div>
-                  <div className="font-bold text-sm text-white">{b.label.substring(2)}</div>
-                  <div className="text-xs text-gray-400 mt-1">{b.desc}</div>
-                  <div className={`mt-2 text-xs font-bold ${earned ? 'text-green-400' : 'text-gray-500'}`}>
-                    {earned ? '✓ Earned' : '🔒 Locked'}
-                  </div>
+                  className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-500"
+                  style={{ width: overallPercentage + '%' }}
+                />
+              </div>
+
+              <p className="text-sm text-gray-400 mt-3">
+                {totalModules === 0
+                  ? 'Your module progress will appear here once course data is available.'
+                  : overallPercentage === 100
+                    ? 'Great work! You have completed all modules in your enrolled courses.'
+                    : 'Keep learning and complete the remaining modules to make progress.'}
+              </p>
+            </section>
+
+            {/* Course progress */}
+            <section>
+              <div className="flex flex-wrap justify-between items-center gap-3 mb-5">
+                <h2 className="text-2xl font-bold text-white">Progress by Course</h2>
+
+                <span className="text-sm text-gray-400">
+                  {totalCourses} {totalCourses === 1 ? 'course' : 'courses'}
+                </span>
+              </div>
+
+              {courses.length === 0 ? (
+                <div className="bg-[#11161f] border border-[#1e2330] rounded-xl p-8 text-center">
+                  <div className="text-4xl mb-3">📚</div>
+                  <h3 className="text-lg font-bold text-white">No enrolled courses yet</h3>
+                  <p className="text-gray-400 text-sm mt-2">
+                    Enroll in a course to start tracking your learning progress.
+                  </p>
+                  <button
+                    onClick={() => navigate('/student-dashboard')}
+                    className="mt-5 bg-cyan-500 hover:bg-cyan-400 text-[#0a0f1a] font-semibold px-5 py-2 rounded-lg transition"
+                  >
+                    Go to Dashboard
+                  </button>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+              ) : (
+                <div className="space-y-6">
+                  {courseProgress.map((item, index) => {
+                    const { course, modules, error: courseError } = item;
+                    const percentage = getCoursePercentage(modules);
+                    const completed = modules.filter(isCompleted).length;
+
+                    return (
+                      <article
+                        key={course.id ?? course.courseId ?? index}
+                        className="bg-[#11161f] border border-[#1e2330] rounded-xl p-5 sm:p-6"
+                      >
+                        {/* Course heading */}
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4">
+                          <div>
+                            <h3 className="text-xl font-bold text-white">
+                              {getCourseTitle(course)}
+                            </h3>
+
+                            <p className="text-sm text-gray-400 mt-1">
+                              {completed} of {modules.length} modules completed
+                            </p>
+                          </div>
+
+                          <span className="text-lg font-bold text-cyan-400">
+                            {courseError ? '—' : percentage + '%'}
+                          </span>
+                        </div>
+
+                        {!courseError && (
+                          <div
+                            className="w-full h-2 bg-[#1e2330] rounded-full overflow-hidden mb-5"
+                            role="progressbar"
+                            aria-label={getCourseTitle(course) + ' completion'}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-valuenow={percentage}
+                          >
+                            <div
+                              className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-500"
+                              style={{ width: percentage + '%' }}
+                            />
+                          </div>
+                        )}
+
+                        {courseError ? (
+                          <p className="text-sm text-red-300">{courseError}</p>
+                        ) : modules.length === 0 ? (
+                          <p className="text-sm text-gray-400">
+                            No modules are available for this course yet.
+                          </p>
+                        ) : (
+                          <div className="space-y-3">
+                            {modules.map((module, moduleIndex) => {
+                              const completedModule = isCompleted(module);
+
+                              return (
+                                <div
+                                  key={module.moduleId ?? moduleIndex}
+                                  className="border border-[#252c3a] rounded-lg p-4"
+                                >
+                                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                                    <div className="flex items-start gap-3">
+                                      <div
+                                        className={
+                                          'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ' +
+                                          (completedModule
+                                            ? 'bg-green-500/15 text-green-400'
+                                            : 'bg-[#1e2330] text-gray-400')
+                                        }
+                                      >
+                                        {completedModule
+                                          ? '✓'
+                                          : (module.orderIndex ?? moduleIndex + 1)}
+                                      </div>
+
+                                      <div>
+                                        <h4 className="font-semibold text-white">
+                                          {module.moduleTitle || 'Module ' + (moduleIndex + 1)}
+                                        </h4>
+
+                                        <p className="text-xs text-gray-400 mt-1">
+                                          {completedModule ? 'Module completed' : 'In progress'}
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    <span
+                                      className={
+                                        'self-start text-xs font-semibold px-3 py-1 rounded-full ' +
+                                        (completedModule
+                                          ? 'bg-green-500/10 text-green-400'
+                                          : 'bg-yellow-500/10 text-yellow-400')
+                                      }
+                                    >
+                                      {completedModule ? 'Completed' : 'Pending'}
+                                    </span>
+                                  </div>
+
+                                  <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 pl-11 text-sm">
+                                    <span className="text-gray-400">
+                                      Quiz Score:{' '}
+                                      <span className="text-white font-medium">
+                                        {module.quizScore ?? 0}%
+                                      </span>
+                                    </span>
+
+                                    <span className="text-gray-400">
+                                      Completed On:{' '}
+                                      <span className="text-white font-medium">
+                                        {formatDate(module.completedAt)}
+                                      </span>
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          </>
+        )}
+      </main>
     </div>
   );
 }
