@@ -5,10 +5,18 @@ import config from '../../config/config';
 
 export default function TeacherManageCourses() {
   const navigate = useNavigate();
+
+
   const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const API_BASE = config.API_BASE;
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState('');
+
+const [indexingCourseId, setIndexingCourseId] = useState(null);
+const [indexMessage, setIndexMessage] = useState('');
+
+const API_BASE = config.API_BASE;
+
+  
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -72,10 +80,47 @@ export default function TeacherManageCourses() {
     }
   };
 
+
+
+  const indexCourse = async (courseId) => {
+  setIndexingCourseId(courseId);
+  setIndexMessage('');
+
+
+
+ 
+
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/rag-test/courses/${courseId}/index`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      }
+    );
+
+    const data = await res.text();
+
+    if (!res.ok) {
+      throw new Error(data || 'Course indexing failed');
+    }
+
+    setIndexMessage(`✅ ${data}`);
+  } catch (err) {
+    setIndexMessage(`❌ ${err.message}`);
+  } finally {
+    setIndexingCourseId(null);
+  }
+};
+
   const handleLogout = () => {
     localStorage.clear();
     navigate('/');
   };
+
+
 
   return (
     <div className="min-h-screen bg-[#0a0f1a] text-gray-200 font-sans">
@@ -114,7 +159,19 @@ export default function TeacherManageCourses() {
           </button>
         </div>
 
+
+
+        
+
         {loading && <div className="text-center text-gray-400">Loading...</div>}
+
+
+        {indexMessage && (
+  <div className="mb-4 p-3 rounded-lg bg-[#11161f] border border-[#293548] text-sm text-gray-200">
+    {indexMessage}
+  </div>
+)}
+
         {error && <div className="text-center text-red-400">{error}</div>}
         {!loading && !error && (
           <div className="space-y-4">
@@ -147,6 +204,18 @@ export default function TeacherManageCourses() {
                     >
                       Modules
                     </button>
+
+
+<button
+  onClick={() => indexCourse(course.id)}
+  disabled={indexingCourseId === course.id}
+  className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm font-medium hover:bg-purple-700 transition disabled:opacity-50"
+>
+  {indexingCourseId === course.id
+    ? 'Indexing...'
+    : '✨ Index Course'}
+</button>
+
                   </div>
                 </div>
               ))

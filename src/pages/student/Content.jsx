@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import config from '../../config/config';
-
+import AIChat from './AIChat';
 
 export default function Content() {
   const { courseId, moduleId } = useParams();
@@ -291,6 +291,9 @@ export default function Content() {
             }}
           />
         </div>
+
+                {/* LearnBridge AI Assistant */}
+        <AIChat courseId={courseId} />
 
         {/* Footer Task Controls */}
         <div className="flex flex-wrap gap-4 justify-center items-center pt-2">
